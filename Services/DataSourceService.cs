@@ -50,11 +50,23 @@ namespace KendoWebApi.Services
 
                 var processedData = await employeeResponse.AsQueryable().ToDataSourceResultAsync(dataSourceRequest);
                 
-                dataToReturn = new DataEnvelope<Employee>
+                // If grouping is necessary, then cast to AggregateFunctionsGroup
+                if (dataSourceRequest.Groups != null && dataSourceRequest.Groups.Any())
                 {
-                    CurrentPageData = processedData.Data.Cast<Employee>().ToList(),
-                    TotalItemCount = processedData.Total
-                };
+                    dataToReturn = new DataEnvelope<Employee>
+                    {
+                        GroupedData = processedData.Data.Cast<AggregateFunctionsGroup>().ToList(),
+                        TotalItemCount = processedData.Total
+                    };
+                }
+                else
+                {
+                    dataToReturn = new DataEnvelope<Employee>
+                    {
+                        CurrentPageData = processedData.Data.Cast<Employee>().ToList(),
+                        TotalItemCount = processedData.Total
+                    };
+                }
 
                 return dataToReturn;
             }
